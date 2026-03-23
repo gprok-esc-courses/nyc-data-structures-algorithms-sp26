@@ -107,18 +107,18 @@ class AVLTree:
 
 
 
-# data = [100, 45, 140, 11, 35, 68, 110, 200]
-data = [10, 20, 30, 40, 50, 60, 70, 80]
+data = [100, 45, 140, 11, 35, 68, 110, 200]
+# data = [10, 20, 30, 40, 50, 60, 70, 80]
 tree = AVLTree()
 for value in data:
     tree.insert_value(value)
 tree.display()
 
-# print("Delete ")
-# tree.delete_value(11)
-# tree.delete_value(68)
-# tree.delete_value(140)
-# tree.display()
+print("Delete ")
+tree.delete_value(11)
+tree.delete_value(68)
+tree.delete_value(140)
+tree.display()
 
         
 
