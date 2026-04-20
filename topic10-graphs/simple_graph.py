@@ -1,12 +1,18 @@
-
+import sys
 
 class Vertex:
     def __init__(self, value):
         self.value = value 
         self.edges = []
+        # vars for BFS 
+        self.color = None 
+        self.parent = None
+        self.distance = sys.maxsize
 
+    # A d:0 [B C E G ]
     def __str__(self):
-        s = self.value + " ["
+        parent = "None" if self.parent is None else self.parent.value
+        s = self.value + " d:" + str(self.distance) + " p:" + parent + " ["
         for e in self.edges:
             s += e.vertex.value
         s += "]"
@@ -52,7 +58,54 @@ class Graph:
         for v in self.vertices:
             print(v)
 
-    
+    def init_vertices(self):
+        for vertex in self.vertices:
+            vertex.parent = None
+            vertex.color = 'white'
+            vertex.distance = sys.maxsize
+
+    def bfs(self, starting_value):
+        self.init_vertices()
+        vertex = self.get_vertex(starting_value)
+        if vertex is None:
+            print(f"{starting_value} not in the Graph")
+        else:
+            q = []
+            vertex.distance = 0
+            vertex.color = 'gray'
+            q.append(vertex)
+            while len(q) > 0:
+                vertex = q.pop(0)
+                for connection in vertex.edges:
+                    v = connection.vertex
+                    if v.color == 'white':
+                        v.distance = vertex.distance + 1
+                        v.color = 'gray'
+                        v.parent = vertex
+                        q.append(v)
+                vertex.color = 'black'
+
+    def print_path(self, start_value, dest_value):
+        start = self.get_vertex(start_value)
+        dest = self.get_vertex(dest_value) 
+        if start is None or dest is None:
+            print("One or both vertices not found")
+        else:
+            self.print_path_recursive(start, dest)
+            print()
+
+    def print_path_recursive(self, start, dest):
+        if start == dest:
+            print(start.value, end=' ')
+        elif dest.parent is None:
+            print(f"No path to {start.value} from {dest.value}")
+        else:
+            self.print_path_recursive(start, dest.parent)
+            print(dest.value, end=' ')
+            
+
+
+
 
 values = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]   
 
@@ -60,13 +113,16 @@ graph = Graph()
 for value in values:
     graph.add_vertex(value)
 
-graph.connect_many("A", "B", "C", "E", "G")
+graph.connect_many("A", "B", "C", "E")
 graph.connect_many("B", "D")
 graph.connect_many("C", "F", "D")
 graph.connect_many("D", "F")
-graph.connect_many("E", "E", "F")
+graph.connect_many("E", "F")
 graph.connect_many("F", "G", "H")
 graph.connect_many("G", "H")
 graph.connect_many("J", "K")
+
+graph.bfs("A")
+graph.print_path("A", "H")
 
 graph.display()
