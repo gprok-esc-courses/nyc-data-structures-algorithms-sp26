@@ -18,14 +18,14 @@ class Vertex:
         s += "]"
         return s
     
-    def add_connection(self, vertex):
-        self.edges.append(Edge(vertex))
+    def add_connection(self, vertex, dist=1):
+        self.edges.append(Edge(vertex, dist))
 
     
 class Edge:
-    def __init__(self, vertex):
+    def __init__(self, vertex, dist=1):
         self.vertex = vertex 
-        self.weight = 1
+        self.weight = dist
 
     
 class Graph:
@@ -45,12 +45,12 @@ class Graph:
         for arg in args:
             self.connect(v1, arg)
 
-    def connect(self, v1, v2):
+    def connect(self, v1, v2, dist=1):
         vertex1 = self.get_vertex(v1)
         vertex2 = self.get_vertex(v2)
         if vertex1 is not None and vertex2 is not None:
-            vertex1.add_connection(vertex2)
-            vertex2.add_connection(vertex1)
+            vertex1.add_connection(vertex2, dist)
+            vertex2.add_connection(vertex1, dist)
         else:
             print("One or both vertices not found")
 
@@ -85,6 +85,11 @@ class Graph:
                         q.append(v)
                 vertex.color = 'black'
 
+    def relax(self, u, v, w):
+        if v.distance > u.distance + w:
+            v.distance = u.distance + w
+            v.parent = u
+
     def print_path(self, start_value, dest_value):
         start = self.get_vertex(start_value)
         dest = self.get_vertex(dest_value) 
@@ -102,27 +107,68 @@ class Graph:
         else:
             self.print_path_recursive(start, dest.parent)
             print(dest.value, end=' ')
+
+    def dijkstra(self, start):
+        self.init_vertices()
+        v = self.get_vertex(start)
+        if v is None:
+            print(f"Vertex {start} not found")
+            return
+        v.distance = 0
+        Q = []
+        for vertex in self.vertices:
+            Q.append(vertex)
+        while len(Q) > 0:
+            # Sort the queue
+            Q.sort(key=lambda x : x.distance)
+            u = Q.pop(0)
+            for e in u.edges:
+                v = e.vertex
+                w = e.weight
+                self.relax(u, v, w)
+
+
             
 
 
 
+# EXAMPLE FOR BFS
+# values = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]   
 
-values = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]   
+# graph = Graph()
+# for value in values:
+#     graph.add_vertex(value)
+
+# graph.connect_many("A", "B", "C", "E")
+# graph.connect_many("B", "D")
+# graph.connect_many("C", "F", "D")
+# graph.connect_many("D", "F")
+# graph.connect_many("E", "F")
+# graph.connect_many("F", "G", "H")
+# graph.connect_many("G", "H")
+# graph.connect_many("J", "K")
+
+# graph.bfs("A")
+# graph.print_path("A", "H")
+
+# graph.display()
+
+# EXAMPLE FOR DIJKSTRA
+values = ["A", "B", "C", "D", "E", "F", "G"]
+connections = [
+    ["A", "B", 4], ["A", "E", 5], ["A", "D", 3], ["B", "C", 2], ["B", "E", 2],
+    ["D", "G", 1], ["E", "C", 3], ["E", "F", 6], ["E", "G", 4],
+    ["C", "F", 1], ["G", "F", 1]
+]
 
 graph = Graph()
 for value in values:
     graph.add_vertex(value)
 
-graph.connect_many("A", "B", "C", "E")
-graph.connect_many("B", "D")
-graph.connect_many("C", "F", "D")
-graph.connect_many("D", "F")
-graph.connect_many("E", "F")
-graph.connect_many("F", "G", "H")
-graph.connect_many("G", "H")
-graph.connect_many("J", "K")
+for conn in connections:
+    graph.connect(conn[0], conn[1], conn[2])
 
-graph.bfs("A")
-graph.print_path("A", "H")
+graph.dijkstra("A")
+graph.print_path("A", "C")
 
 graph.display()
